@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pipeline Tarvos Partners</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f4f0;color:#1a1a18;font-size:14px}
+:root{--bg:#fff;--bg2:#f5f4f0;--bg3:#eceae4;--border:#d4d2ca;--text:#1a1a18;--text2:#5a5955;--text3:#8a8880}
+.topbar{background:#1a1a18;color:#fff;padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.topbar h1{font-size:15px;font-weight:500;letter-spacing:.3px;flex:1}
+.sync-badge{font-size:11px;color:#888;border:0.5px solid #444;padding:2px 10px;border-radius:4px;white-space:nowrap}
+.sync-badge.ok{color:#6fcf97;border-color:#2d6b45}
+.sync-badge.err{color:#f5a442;border-color:#7a4a10}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--bg);padding:0 20px}
+.tab{padding:10px 18px;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text2);background:none;border-top:none;border-left:none;border-right:none;white-space:nowrap}
+.tab.active{color:var(--text);border-bottom-color:#1a1a18;font-weight:500}
+.tab:hover{color:var(--text)}
+.toolbar{padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--bg);border-bottom:0.5px solid var(--border)}
+select,input{font-size:12px;padding:5px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-family:inherit}
+.btn-new{margin-left:auto;background:#1a1a18;color:#fff;border:none;padding:7px 16px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer}
+.btn-new:hover{background:#333}
+.count{font-size:12px;color:var(--text3)}
+.search-wrap{display:none;padding:12px 20px;background:var(--bg);border-bottom:0.5px solid var(--border);flex-direction:column;gap:10px}
+.search-wrap.open{display:flex}
+.search-row{display:flex;gap:8px;align-items:center}
+.search-input{flex:1;font-size:13px;padding:8px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit}
+.search-input:focus{outline:none;border-color:#888}
+.sr-list{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto}
+.sr-item{background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sr-name{font-size:13px;font-weight:500}
+.sr-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.sr-col{font-size:11px;font-weight:500;padding:3px 10px;border-radius:999px;background:#e0e0dc;color:var(--text2);white-space:nowrap;flex-shrink:0}
+.sr-edit{font-size:11px;padding:4px 10px;border-radius:6px;border:0.5px solid var(--border);background:transparent;cursor:pointer;color:var(--text2);flex-shrink:0}
+.board{display:flex;gap:10px;padding:16px 20px;overflow-x:auto;min-height:calc(100vh - 180px)}
+.col{min-width:220px;width:220px;flex-shrink:0;background:var(--bg3);border-radius:12px;padding:10px;border:0.5px solid var(--border)}
+.col.dragover-col{background:#ddd9f0}
+.col-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.col-title{font-size:12px;font-weight:500;color:var(--text2)}
+.col-count{font-size:11px;color:var(--text3);background:var(--bg);border-radius:999px;padding:1px 7px;border:0.5px solid var(--border)}
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:grab;user-select:none;position:relative}
+.card:active{cursor:grabbing}
+.card.dragging{opacity:.4}
+.card.drop-before{border-top:3px solid #7F77DD}
+.card.drop-after{border-bottom:3px solid #7F77DD}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
+.card-name{font-size:13px;font-weight:500;flex:1;line-height:1.3}
+.card-cnpj{font-size:11px;color:var(--text3);margin-top:2px}
+.card-nums{font-size:11px;color:var(--text2);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap}
+.card-num-divida{color:#993C1D}
+.badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:7px}
+.badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:999px;white-space:nowrap}
+.card-action{font-size:11px;color:var(--text2);margin-top:6px;border-top:0.5px solid var(--border);padding-top:5px;line-height:1.4}
+.card-obs{font-size:11px;color:var(--text3);margin-top:4px;font-style:italic;line-height:1.4}
+.card-resp{font-size:11px;color:var(--text3);margin-top:3px}
+.card-btns{display:flex;gap:4px;margin-top:8px;align-items:center}
+.btn-edit{font-size:10px;padding:3px 7px;border-radius:5px;border:0.5px solid var(--border);background:transparent;cursor:pointer;color:var(--text2);white-space:nowrap;flex-shrink:0}
+.btn-del{font-size:10px;padding:3px 7px;border-radius:5px;border:1px solid #a32d2d;background:#fdecea;cursor:pointer;color:#a32d2d;font-weight:500;white-space:nowrap;flex-shrink:0}
+.btn-del:hover{background:#a32d2d;color:#fff}
+.col-sel{font-size:10px;padding:3px 4px;border-radius:5px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);flex:1;min-width:0}
+.btn-add-col{width:100%;font-size:11px;color:var(--text3);background:transparent;border:0.5px dashed var(--border);border-radius:8px;padding:7px;cursor:pointer;margin-top:2px}
+.btn-add-col:hover{color:var(--text2);border-color:#888}
+.dash{padding:16px 20px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.metrics2{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.metric{background:var(--bg);border-radius:10px;padding:10px 14px;border:0.5px solid var(--border)}
+.metric-label{font-size:11px;color:var(--text3);margin-bottom:4px}
+.metric-val{font-size:22px;font-weight:500}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.chart-box{background:var(--bg);border-radius:10px;padding:14px 16px;border:0.5px solid var(--border)}
+.chart-title{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:12px}
+.donut-wrap{display:flex;align-items:center;gap:12px}
+.legend{display:flex;flex-direction:column;gap:5px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2)}
+.legend-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.legend-pct{margin-left:auto;color:var(--text3)}
+.funnel-box{background:var(--bg);border-radius:10px;padding:14px 16px;border:0.5px solid var(--border)}
+.funnel-row{margin-bottom:9px}
+.funnel-meta{display:flex;justify-content:space-between;margin-bottom:3px;font-size:11px;color:var(--text2)}
+.funnel-track{height:10px;border-radius:999px;background:var(--bg3);overflow:hidden}
+.funnel-fill{height:100%;border-radius:999px;transition:width .4s}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--bg);border-radius:14px;padding:22px 26px;width:460px;max-width:95vw;max-height:90vh;overflow-y:auto;border:0.5px solid #aaa}
+.modal h2{font-size:16px;font-weight:500;margin-bottom:18px}
+.field{margin-bottom:12px}
+.field label{font-size:12px;color:var(--text2);display:block;margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;font-size:13px;padding:8px 10px;border-radius:7px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit}
+.field textarea{resize:vertical}
+.modal-btns{display:flex;gap:8px;margin-top:18px}
+.btn-save{flex:1;padding:9px;border-radius:8px;border:none;background:#1a1a18;color:#fff;font-weight:500;font-size:13px;cursor:pointer}
+.btn-cancel{flex:1;padding:9px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--text2);font-size:13px;cursor:pointer}
+.btn-export{font-size:12px;padding:5px 12px;border-radius:6px;border:0.5px solid #555;background:transparent;cursor:pointer;color:#ccc}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nec-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.nec-chip{padding:5px 11px;border-radius:999px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid transparent;opacity:.4;transition:opacity .15s,border-color .15s;white-space:nowrap}
+.nec-chip.selected{opacity:1;border-color:currentColor;box-shadow:0 0 0 2px rgba(0,0,0,.07)}
+.splash{position:fixed;inset:0;background:#1a1a18;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:9999}
+.splash-logo{font-size:20px;font-weight:500;color:#fff;letter-spacing:.5px}
+.splash-sub{font-size:12px;color:#888}
+.spinner{width:32px;height:32px;border:3px solid #333;border-top-color:#f5c842;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#6fcf97;margin-right:6px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@media(max-width:600px){.metrics,.metrics2{grid-template-columns:1fr 1fr}.charts-row{grid-template-columns:1fr}.row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <div class="spinner"></div>
+  <div class="splash-logo">Tarvos Partners</div>
+  <div class="splash-sub" id="splash-msg">Conectando ao banco de dados...</div>
+</div>
+
+<div class="topbar">
+  <h1>Tarvos Partners · Pipeline</h1>
+  <span class="sync-badge" id="sync-badge"><span class="pulse"></span>Ao vivo</span>
+  <button class="btn-export" onclick="exportCSV()">⬇ Exportar CSV</button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('kanban',this)">Kanban</button>
+  <button class="tab" onclick="switchTab('dashboard',this)">Dashboard</button>
+  <button class="tab" onclick="switchTab('search',this)">🔍 Buscar</button>
+</div>
+
+<div class="toolbar" id="toolbar">
+  <select id="f-canal" onchange="render()"><option value="">Todos os canais</option></select>
+  <select id="f-nec" onchange="render()"><option value="">Todas as necessidades</option></select>
+  <span class="count" id="count-label">—</span>
+  <button class="btn-new" onclick="openModal()">+ Nova oportunidade</button>
+</div>
+
+<div class="search-wrap" id="search-wrap">
+  <div class="search-row">
+    <input class="search-input" id="search-input" type="text" placeholder="Digite o nome da empresa..." oninput="doSearch()">
+    <button onclick="clearSearch()" style="font-size:12px;padding:7px 14px;border-radius:7px;border:0.5px solid var(--border);background:transparent;cursor:pointer;color:var(--text2)">Limpar</button>
+  </div>
+  <div class="sr-list" id="sr-list"></div>
+</div>
+
+<div id="view-kanban"><div class="board" id="board"></div></div>
+<div id="view-dashboard" style="display:none"><div class="dash" id="dash"></div></div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="modal-title">Nova oportunidade</h2>
+    <input type="hidden" id="f-id">
+    <div class="field"><label>Empresa *</label><input type="text" id="f-empresa" placeholder="Razão social"></div>
+    <div class="field"><label>CNPJ</label><input type="text" id="f-cnpj" placeholder="00.000.000/0001-00"></div>
+    <div class="field"><label>Faturamento (R$)</label><input type="number" id="f-fat" placeholder="0"></div>
+    <div class="row2">
+      <div class="field"><label>Ticket estimado (R$)</label><input type="number" id="f-ticket" placeholder="0"></div>
+      <div class="field"><label>Dívida estimada (R$)</label><input type="number" id="f-divida" placeholder="0"></div>
+    </div>
+    <div class="field"><label>Canal de originação</label><select id="f-canal-m"></select></div>
+    <div class="field"><label>Necessidades</label><div class="nec-grid" id="nec-chips"></div></div>
+    <div class="row2">
+      <div class="field"><label>Estágio</label><select id="f-col"></select></div>
+      <div class="field"><label>Prioridade</label>
+        <select id="f-prio"><option>Alta</option><option selected>Média</option><option>Baixa</option></select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Responsável</label><input type="text" id="f-resp" placeholder="Nome"></div>
+      <div class="field"><label>Data de entrada</label><input type="date" id="f-data"></div>
+    </div>
+    <div class="field"><label>Próxima ação</label><input type="text" id="f-acao" placeholder="Descreva a próxima ação"></div>
+    <div class="field"><label>Prazo</label><input type="date" id="f-prazo"></div>
+    <div class="field"><label>Observações</label><textarea id="f-obs" rows="4" placeholder="Informações da empresa, contexto do caso, credores relevantes..."></textarea></div>
+    <div class="modal-btns">
+      <button class="btn-save" onclick="saveCard()">Salvar</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBVRowHrQvLCs3NcRjks5dTZPKt9oN7oXA",
+  authDomain: "tarvos-pipeline.firebaseapp.com",
+  projectId: "tarvos-pipeline",
+  storageBucket: "tarvos-pipeline.firebasestorage.app",
+  messagingSenderId: "958462368022",
+  appId: "1:958462368022:web:adf303c53905749a405837"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+const REF = doc(db, "pipeline", "cards");
+
+var COLS   = ["Leads","Leads Qualificados","Associados","Análise Técnica","Oportunidade","Reunião de Apresentação","Proposta Enviada","Em Negociação","Em Assinatura","Convertido","Descartado","Stand By"];
+var CANAIS = ["Mineração RJ/Falência","Network","Associados","Eventos","Mídia"];
+var NECS   = ["Reestruturação","NPL","DIP","Distressed Asset","Captação","Desmobilização","Fixo","Valuation","M&A","Advisory (projeto)","Precatórios","Direitos Creditórios","Dívida","Roadshow","Book"];
+var CANAL_C= {"Mineração RJ/Falência":"#7F77DD","Network":"#1D9E75","Associados":"#378ADD","Eventos":"#BA7517","Mídia":"#D4537E"};
+var NEC_C  = {"Reestruturação":"#533AB7","NPL":"#0F6E56","DIP":"#185FA5","Distressed Asset":"#993C1D","Captação":"#0E7490","Desmobilização":"#7C5917","Fixo":"#3D6B35","Valuation":"#6B3D8A","M&A":"#B5460F","Advisory (projeto)":"#5A7A8A","Precatórios":"#8A5A2A","Direitos Creditórios":"#2A6B5A","Dívida":"#7A2A2A","Roadshow":"#2A5A7A","Book":"#4A4A2A"};
+var PRIO_S = {"Alta":{bg:"#FCEBEB",c:"#A32D2D"},"Média":{bg:"#FAEEDA",c:"#854F0B"},"Baixa":{bg:"#EAF3DE",c:"#3B6D11"}};
+var COL_C  = ["#B0A8E8","#7F77DD","#533AB7","#4A90C4","#378ADD","#185FA5","#1D9E75","#0F6E56","#BA7517","#3B6D11","#888780","#C4A35A"];
+
+var cards   = [];
+var curTab  = "kanban";
+var dragId  = null, dragOverId = null, dragPos = "after";
+var isSaving = false;
+var pendingSave = false;
+
+function escH(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function setBadge(txt, ok){
+  var b = document.getElementById("sync-badge");
+  b.innerHTML = '<span class="pulse"></span>' + txt;
+  b.className = "sync-badge" + (ok===false?" err": ok===true?" ok":"");
+}
+
+/* ── MIGRAÇÃO ── */
+function migrar(arr){
+  var colMapa = {"Análise":"Oportunidade","Tese Definida":"Reunião de Apresentação","Em Abordagem":"Proposta Enviada","Variação de EBITDA":"Fixo"};
+  return (arr||[]).map(function(c){
+    var nc = Object.assign({},c);
+    if(colMapa[nc.col]) nc.col = colMapa[nc.col];
+    var na = Array.isArray(nc.nec)?nc.nec:(nc.nec?[nc.nec]:[]);
+    nc.nec = na.filter(function(n){ return n!=="Extraconcursal"; });
+    return nc;
+  });
+}
+
+/* ── FIREBASE SAVE ── */
+async function saveRemote(){
+  if(isSaving){ pendingSave=true; return; }
+  isSaving=true; setBadge("Salvando...", null);
+  try{
+    await setDoc(REF, {cards: cards, updatedAt: Date.now()});
+    setBadge("Ao vivo", true);
+  } catch(e){
+    setBadge("Erro ao salvar", false);
+  }
+  isSaving=false;
+  if(pendingSave){ pendingSave=false; saveRemote(); }
+}
+
+/* ── MIGRAÇÃO DO LOCALSTORAGE ── */
+async function migrarLocalStorage(){
+  try{
+    var local = localStorage.getItem("tarvos_pipeline_v3");
+    if(!local) return;
+    var dados = JSON.parse(local);
+    if(!dados || !dados.length) return;
+    var snap = await getDoc(REF);
+    var remoto = snap.exists() ? (snap.data().cards||[]) : [];
+    if(remoto.length === 0){
+      cards = migrar(dados);
+      await saveRemote();
+    }
+    localStorage.removeItem("tarvos_pipeline_v3");
+  } catch(e){}
+}
+
+/* ── LISTENER TEMPO REAL ── */
+function startListener(){
+  onSnapshot(REF, function(snap){
+    if(!snap.exists()){ cards=[]; render(); return; }
+    var data = snap.data().cards || [];
+    cards = migrar(data);
+    render();
+    if(document.getElementById("search-wrap").classList.contains("open")) doSearch();
+    setBadge("Ao vivo", true);
+  }, function(){
+    setBadge("Sem conexão", false);
+  });
+}
+
+/* ── INIT ── */
+async function init(){
+  document.getElementById("splash-msg").textContent = "Verificando dados locais...";
+  await migrarLocalStorage();
+  document.getElementById("splash-msg").textContent = "Conectando ao banco...";
+  startListener();
+  setTimeout(function(){ document.getElementById("splash").style.display="none"; }, 1200);
+}
+
+init();
+
+/* ── TABS ── */
+window.switchTab = function(tab,el){
+  curTab=tab;
+  document.querySelectorAll(".tab").forEach(function(t){ t.classList.remove("active"); });
+  el.classList.add("active");
+  document.getElementById("view-kanban").style.display    = tab==="kanban"?"":"none";
+  document.getElementById("view-dashboard").style.display = tab==="dashboard"?"":"none";
+  document.getElementById("search-wrap").classList[tab==="search"?"add":"remove"]("open");
+  document.getElementById("toolbar").style.display        = tab==="search"?"none":"";
+  if(tab==="search"){ document.getElementById("search-input").focus(); doSearch(); }
+  if(tab!=="search") render();
+};
+
+/* ── SEARCH ── */
+window.doSearch = function(){
+  var q=(document.getElementById("search-input").value||"").trim().toLowerCase();
+  var list=document.getElementById("sr-list");
+  if(!q){ list.innerHTML='<div style="font-size:13px;color:var(--text3);padding:4px 0">Digite para buscar.</div>'; return; }
+  var found=cards.filter(function(c){ return (c.empresa||"").toLowerCase().indexOf(q)!==-1; });
+  if(!found.length){ list.innerHTML='<div style="font-size:13px;color:var(--text3);padding:4px 0">Nenhuma oportunidade encontrada.</div>'; return; }
+  list.innerHTML=found.map(function(c){
+    var na=Array.isArray(c.nec)?c.nec:(c.nec?[c.nec]:[]);
+    var badges=na.map(function(n){ var nc=NEC_C[n]||"#888"; return '<span style="font-size:10px;font-weight:500;padding:2px 7px;border-radius:999px;background:'+nc+'22;color:'+nc+'">'+escH(n)+'</span>'; }).join("");
+    return '<div class="sr-item"><div style="flex:1"><div class="sr-name">'+escH(c.empresa||"Sem nome")+'</div><div class="sr-meta">'+(c.cnpj?escH(c.cnpj)+' · ':'')+escH(c.canal||'')+'</div>'+(badges?'<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">'+badges+'</div>':'')+
+    '</div><span class="sr-col">'+escH(c.col)+'</span><button class="sr-edit" onclick="openModal(null,\''+c.id+'\')">Editar</button></div>';
+  }).join("");
+};
+
+window.clearSearch = function(){ document.getElementById("search-input").value=""; doSearch(); };
+
+/* ── FILTERS ── */
+function filtered(){
+  var fc=document.getElementById("f-canal").value;
+  var fn=document.getElementById("f-nec").value;
+  return cards.filter(function(c){
+    var na=Array.isArray(c.nec)?c.nec:(c.nec?[c.nec]:[]);
+    return (!fc||c.canal===fc)&&(!fn||na.indexOf(fn)!==-1);
+  });
+}
+
+function populateFilters(){
+  var fc=document.getElementById("f-canal"),fn=document.getElementById("f-nec");
+  var cv=fc.value,nv=fn.value;
+  fc.innerHTML='<option value="">Todos os canais</option>'+CANAIS.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join("");
+  fn.innerHTML='<option value="">Todas as necessidades</option>'+NECS.map(function(n){ return '<option value="'+n+'">'+n+'</option>'; }).join("");
+  fc.value=cv; fn.value=nv;
+  var fm=document.getElementById("f-canal-m"),cm=document.getElementById("f-col");
+  if(fm) fm.innerHTML=CANAIS.map(function(c){ return '<option>'+c+'</option>'; }).join("");
+  if(cm) cm.innerHTML=COLS.map(function(c){ return '<option>'+c+'</option>'; }).join("");
+}
+
+function render(){
+  populateFilters();
+  var f=filtered();
+  document.getElementById("count-label").textContent=f.length+" oportunidade"+(f.length!==1?"s":"");
+  if(curTab==="kanban") renderBoard(f);
+  else if(curTab==="dashboard") renderDash(f);
+}
+
+/* ── BOARD ── */
+function renderBoard(f){
+  var board=document.getElementById("board");
+  var cf=document.getElementById("f-canal").value;
+  var showLeads=(cf==="Mídia");
+  var vis=COLS.filter(function(c){ return (c==="Leads"||c==="Leads Qualificados")?showLeads:true; });
+  board.innerHTML="";
+  vis.forEach(function(col){
+    var cc=f.filter(function(c){ return c.col===col; });
+    var div=document.createElement("div");
+    div.className="col"; div.dataset.col=col;
+    var html='<div class="col-header"><span class="col-title">'+col+'</span><span class="col-count">'+cc.length+'</span></div>';
+    cc.forEach(function(card){ html+=cardHTML(card); });
+    html+='<button class="btn-add-col" onclick="openModal(\''+escH(col)+'\')">+ Adicionar</button>';
+    div.innerHTML=html;
+    div.addEventListener("dragover",function(e){
+      e.preventDefault();
+      var t=e.target.closest(".card");
+      document.querySelectorAll(".card").forEach(function(c){ c.classList.remove("drop-before","drop-after"); });
+      if(t&&t.dataset.cid!==String(dragId)){
+        var r=t.getBoundingClientRect();
+        if(e.clientY<r.top+r.height/2){ t.classList.add("drop-before"); dragOverId=t.dataset.cid; dragPos="before"; }
+        else{ t.classList.add("drop-after"); dragOverId=t.dataset.cid; dragPos="after"; }
+        div.classList.remove("dragover-col");
+      } else { dragOverId=null; div.classList.add("dragover-col"); }
+    });
+    div.addEventListener("dragleave",function(e){
+      if(!div.contains(e.relatedTarget)){ div.classList.remove("dragover-col"); document.querySelectorAll(".card").forEach(function(c){ c.classList.remove("drop-before","drop-after"); }); }
+    });
+    div.addEventListener("drop",function(e){
+      e.preventDefault(); div.classList.remove("dragover-col");
+      document.querySelectorAll(".card").forEach(function(c){ c.classList.remove("drop-before","drop-after"); });
+      if(!dragId) return;
+      if(dragOverId&&String(dragOverId)!==String(dragId)) reorderCard(dragId,col,dragOverId,dragPos);
+      else moveCard(dragId,col);
+      dragId=null; dragOverId=null;
+    });
+    board.appendChild(div);
+  });
+}
+
+function cardHTML(card){
+  var ps=PRIO_S[card.prioridade]||{bg:"#eee",c:"#333"};
+  var cc=CANAL_C[card.canal]||"#888";
+  var na=Array.isArray(card.nec)?card.nec:(card.nec?[card.nec]:[]);
+  var colOpts=COLS.map(function(c){ return '<option'+(c===card.col?" selected":"")+'>'+c+'</option>'; }).join("");
+  var nums=[];
+  if(card.ticket) nums.push("Ticket: R$ "+parseFloat(card.ticket).toLocaleString("pt-BR"));
+  if(card.fat)    nums.push("Fat.: R$ "+parseFloat(card.fat).toLocaleString("pt-BR"));
+  if(card.divida) nums.push('<span class="card-num-divida">Dívida: R$ '+parseFloat(card.divida).toLocaleString("pt-BR")+'</span>');
+  var necB=na.map(function(n){ var nc=NEC_C[n]||"#888"; return '<span class="badge" style="background:'+nc+'22;color:'+nc+'">'+escH(n)+'</span>'; }).join("");
+  var h='<div class="card" draggable="true" data-cid="'+card.id+'" id="card-'+card.id+'" ondragstart="dragId=\''+card.id+'\';this.classList.add(\'dragging\')" ondragend="this.classList.remove(\'dragging\')">';
+  h+='<div class="card-top"><span class="card-name">'+escH(card.empresa||"Sem nome")+'</span><span class="badge" style="background:'+ps.bg+';color:'+ps.c+'">'+card.prioridade+'</span></div>';
+  if(card.cnpj)        h+='<div class="card-cnpj">'+escH(card.cnpj)+'</div>';
+  if(nums.length)      h+='<div class="card-nums">'+nums.join(" · ")+'</div>';
+  h+='<div class="badges"><span class="badge" style="background:'+cc+'22;color:'+cc+'">'+escH(card.canal)+'</span>'+necB+'</div>';
+  if(card.proximaAcao) h+='<div class="card-action"><b>Próx. ação:</b> '+escH(card.proximaAcao)+(card.prazo?" · "+card.prazo:"")+'</div>';
+  if(card.obs)         h+='<div class="card-obs">'+escH(card.obs.length>90?card.obs.slice(0,90)+"…":card.obs)+'</div>';
+  if(card.responsavel) h+='<div class="card-resp">'+escH(card.responsavel)+'</div>';
+  h+='<div class="card-btns"><button class="btn-edit" onclick="openModal(null,\''+card.id+'\')">Editar</button><select class="col-sel" onchange="moveCard(\''+card.id+'\',this.value)">'+colOpts+'</select><button class="btn-del" onclick="delCard(\''+card.id+'\')">✕ Excluir</button></div>';
+  if(card.col==="Descartado") h+='<button onclick="delCard(\''+card.id+'\')" style="width:100%;margin-top:6px;padding:5px;border-radius:6px;border:1px solid #a32d2d;background:#fdecea;color:#a32d2d;font-size:11px;font-weight:500;cursor:pointer">🗑 Excluir permanentemente</button>';
+  h+='</div>';
+  return h;
+}
+
+/* ── REORDER / MOVE ── */
+window.reorderCard = function(fromId,toCol,refId,pos){
+  var idx=-1; for(var i=0;i<cards.length;i++){ if(String(cards[i].id)===String(fromId)){ idx=i; break; } }
+  if(idx===-1) return;
+  var card=Object.assign({},cards[idx],{col:toCol});
+  var tmp=cards.slice(); tmp.splice(idx,1);
+  var ri=-1; for(var j=0;j<tmp.length;j++){ if(String(tmp[j].id)===String(refId)){ ri=j; break; } }
+  if(ri===-1) tmp.push(card); else if(pos==="before") tmp.splice(ri,0,card); else tmp.splice(ri+1,0,card);
+  cards=tmp; saveRemote();
+};
+
+window.moveCard = function(id,col){
+  cards=cards.map(function(c){ return String(c.id)===String(id)?Object.assign({},c,{col:col}):c; });
+  saveRemote();
+};
+
+/* ── NEC CHIPS ── */
+window.buildNecChips = function(selected){
+  var grid=document.getElementById("nec-chips"); if(!grid) return; grid.innerHTML="";
+  NECS.forEach(function(n){
+    var c=NEC_C[n]||"#888";
+    var chip=document.createElement("span");
+    chip.className="nec-chip"+(selected.indexOf(n)!==-1?" selected":"");
+    chip.textContent=n; chip.style.background=c+"22"; chip.style.color=c; chip.dataset.nec=n;
+    chip.onclick=function(){ chip.classList.toggle("selected"); };
+    grid.appendChild(chip);
+  });
+};
+
+function getSelectedNecs(){
+  return Array.prototype.slice.call(document.querySelectorAll("#nec-chips .nec-chip.selected")).map(function(ch){ return ch.dataset.nec; });
+}
+
+/* ── MODAL ── */
+window.openModal = function(col,id){
+  populateFilters();
+  if(id){
+    var c=null; for(var i=0;i<cards.length;i++){ if(String(cards[i].id)===String(id)){ c=cards[i]; break; } } if(!c) return;
+    document.getElementById("modal-title").textContent="Editar oportunidade";
+    document.getElementById("f-id").value=c.id;
+    document.getElementById("f-empresa").value=c.empresa||"";
+    document.getElementById("f-cnpj").value=c.cnpj||"";
+    document.getElementById("f-fat").value=c.fat||"";
+    document.getElementById("f-ticket").value=c.ticket||"";
+    document.getElementById("f-divida").value=c.divida||"";
+    document.getElementById("f-canal-m").value=c.canal||CANAIS[0];
+    document.getElementById("f-col").value=c.col||COLS[0];
+    document.getElementById("f-prio").value=c.prioridade||"Média";
+    document.getElementById("f-resp").value=c.responsavel||"";
+    document.getElementById("f-data").value=c.dataEntrada||"";
+    document.getElementById("f-acao").value=c.proximaAcao||"";
+    document.getElementById("f-prazo").value=c.prazo||"";
+    document.getElementById("f-obs").value=c.obs||"";
+    buildNecChips(Array.isArray(c.nec)?c.nec:(c.nec?[c.nec]:[]));
+  } else {
+    document.getElementById("modal-title").textContent="Nova oportunidade";
+    ["f-id","f-empresa","f-cnpj","f-fat","f-ticket","f-divida","f-resp","f-acao","f-prazo","f-obs"].forEach(function(x){ document.getElementById(x).value=""; });
+    document.getElementById("f-canal-m").value=CANAIS[0];
+    document.getElementById("f-col").value=col||COLS[0];
+    document.getElementById("f-prio").value="Média";
+    document.getElementById("f-data").value=new Date().toISOString().slice(0,10);
+    buildNecChips([]);
+  }
+  document.getElementById("overlay").classList.add("open");
+};
+
+window.closeModal = function(){ document.getElementById("overlay").classList.remove("open"); };
+
+window.saveCard = function(){
+  var id=document.getElementById("f-id").value;
+  var card={
+    id:id||String(Date.now()+Math.random()),
+    empresa:document.getElementById("f-empresa").value.trim(),
+    cnpj:document.getElementById("f-cnpj").value.trim(),
+    fat:document.getElementById("f-fat").value,
+    ticket:document.getElementById("f-ticket").value,
+    divida:document.getElementById("f-divida").value,
+    canal:document.getElementById("f-canal-m").value,
+    nec:getSelectedNecs(),
+    col:document.getElementById("f-col").value,
+    prioridade:document.getElementById("f-prio").value,
+    responsavel:document.getElementById("f-resp").value.trim(),
+    dataEntrada:document.getElementById("f-data").value,
+    proximaAcao:document.getElementById("f-acao").value.trim(),
+    prazo:document.getElementById("f-prazo").value,
+    obs:document.getElementById("f-obs").value.trim()
+  };
+  if(id) cards=cards.map(function(c){ return String(c.id)===String(id)?card:c; });
+  else cards.push(card);
+  saveRemote(); closeModal();
+};
+
+window.delCard = function(id){
+  if(!confirm("Excluir esta oportunidade?")) return;
+  cards=cards.filter(function(c){ return String(c.id)!==String(id); });
+  saveRemote();
+};
+
+/* ── DASHBOARD ── */
+function renderDash(f){
+  var dash=document.getElementById("dash");
+  var excl=["Descartado","Stand By"];
+  var total=f.filter(function(c){ return excl.indexOf(c.col)===-1; }).length;
+  var conv=f.filter(function(c){ return c.col==="Convertido"; }).length;
+  var ativo=f.filter(function(c){ return excl.indexOf(c.col)===-1&&c.col!=="Convertido"; }).length;
+  var rate=total>0?Math.round(conv/total*100):0;
+  var ticket=f.filter(function(c){ return c.ticket; }).reduce(function(s,c){ return s+parseFloat(c.ticket||0); },0);
+  var divida=f.filter(function(c){ return c.divida; }).reduce(function(s,c){ return s+parseFloat(c.divida||0); },0);
+  var cC=f.filter(function(c){ return c.col==="Convertido"&&c.ticket; });
+  var tM=cC.length>0?cC.reduce(function(s,c){ return s+parseFloat(c.ticket||0); },0)/cC.length:0;
+  var tC=f.filter(function(c){ return c.col==="Convertido"&&c.dataEntrada&&c.prazo; });
+  var tm=0; if(tC.length){ var sm=tC.reduce(function(s,c){ return s+Math.max(0,Math.round((new Date(c.prazo)-new Date(c.dataEntrada))/86400000)); },0); tm=Math.round(sm/tC.length); }
+  var dC=f.filter(function(c){ return c.divida; }).length;
+  var html='<div class="metrics">'+
+    '<div class="metric"><div class="metric-label">Total leads</div><div class="metric-val">'+total+'</div></div>'+
+    '<div class="metric"><div class="metric-label">Em andamento</div><div class="metric-val">'+ativo+'</div></div>'+
+    '<div class="metric"><div class="metric-label">Convertidos</div><div class="metric-val">'+conv+'</div></div>'+
+    '<div class="metric"><div class="metric-label">Taxa de conversão</div><div class="metric-val">'+rate+'%</div></div>'+
+  '</div><div class="metrics2">'+
+    '<div class="metric"><div class="metric-label">Ticket médio</div><div class="metric-val" style="font-size:18px">'+(tM>0?"R$ "+tM.toLocaleString("pt-BR",{maximumFractionDigits:0}):"—")+'</div><div class="metric-sub">'+conv+' convertido'+(conv!==1?"s":"")+'</div></div>'+
+    '<div class="metric"><div class="metric-label">Tempo médio de conversão</div><div class="metric-val" style="font-size:18px">'+(tm>0?tm+" dias":"—")+'</div><div class="metric-sub">'+(tC.length>0?tC.length+" registros":"sem dados")+'</div></div>'+
+    '<div class="metric"><div class="metric-label">Dívida estimada total</div><div class="metric-val" style="font-size:18px;color:#993C1D">'+(divida>0?"R$ "+divida.toLocaleString("pt-BR",{maximumFractionDigits:0}):"—")+'</div><div class="metric-sub">'+dC+' mapeada'+(dC!==1?"s":"")+'</div></div>'+
+  '</div>';
+  if(ticket>0) html+='<div class="metric" style="margin-bottom:14px;max-width:280px"><div class="metric-label">Ticket total pipeline</div><div class="metric-val" style="font-size:18px">R$ '+ticket.toLocaleString("pt-BR",{maximumFractionDigits:0})+'</div></div>';
+  html+='<div class="charts-row">'+
+    '<div class="chart-box"><div class="chart-title">Por canal</div>'+donutSVG(CANAIS.map(function(k){ return {k:k,v:f.filter(function(c){ return c.canal===k; }).length,c:CANAL_C[k]}; }))+'</div>'+
+    '<div class="chart-box"><div class="chart-title">Por necessidade</div>'+donutSVG(NECS.map(function(k){ return {k:k,v:f.filter(function(c){ var n=Array.isArray(c.nec)?c.nec:(c.nec?[c.nec]:[]); return n.indexOf(k)!==-1; }).length,c:NEC_C[k]}; }))+'</div>'+
+  '</div>';
+  var active=COLS.filter(function(c){ return c!=="Descartado"&&c!=="Stand By"&&c!=="Leads"&&c!=="Leads Qualificados"; });
+  var max=Math.max.apply(null,[1].concat(active.map(function(c){ return f.filter(function(x){ return x.col===c; }).length; })));
+  var funnel='<div class="funnel-box"><div class="chart-title">Funil de conversão</div>';
+  active.forEach(function(col,i){
+    var n=f.filter(function(c){ return c.col===col; }).length;
+    var pct=max>0?Math.round(n/max*100):0;
+    var prev=i>0?f.filter(function(c){ return c.col===active[i-1]; }).length:n;
+    var cr=prev>0?Math.round(n/prev*100):100;
+    funnel+='<div class="funnel-row"><div class="funnel-meta"><span>'+col+'</span><span>'+n+' lead'+(n!==1?"s":"")+(i>0?' <span style="color:'+COL_C[i]+'">↓'+cr+'%</span>':"")+'</span></div><div class="funnel-track"><div class="funnel-fill" style="width:'+pct+'%;background:'+COL_C[i]+'"></div></div></div>';
+  });
+  dash.innerHTML=html+funnel+'</div>';
+}
+
+function donutSVG(data){
+  var total=data.reduce(function(s,d){ return s+d.v; },0);
+  if(!total) return '<div style="font-size:12px;color:#888;text-align:center;padding:20px 0">Sem dados</div>';
+  var r=52,cx=68,cy=68,gap=14,cum=0;
+  var slices=data.filter(function(d){ return d.v>0; }).map(function(d){
+    var pct=d.v/total,s=cum*2*Math.PI-Math.PI/2; cum+=pct;
+    var e=cum*2*Math.PI-Math.PI/2;
+    var x1=cx+r*Math.cos(s),y1=cy+r*Math.sin(s),x2=cx+r*Math.cos(e),y2=cy+r*Math.sin(e);
+    return {k:d.k,c:d.c,path:"M"+cx+","+cy+"L"+x1+","+y1+"A"+r+","+r+",0,"+(pct>0.5?1:0)+",1,"+x2+","+y2+"Z",pct:Math.round(pct*100)};
+  });
+  return '<div class="donut-wrap"><svg width="136" height="136" viewBox="0 0 136 136" style="flex-shrink:0">'+
+    slices.map(function(s){ return '<path d="'+s.path+'" fill="'+s.c+'" opacity=".9"/>'; }).join("")+
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+(r-gap)+'" fill="#fff"/>'+
+    '<text x="'+cx+'" y="'+(cy-5)+'" text-anchor="middle" font-size="20" font-weight="500" fill="#1a1a18">'+total+'</text>'+
+    '<text x="'+cx+'" y="'+(cy+13)+'" text-anchor="middle" font-size="10" fill="#888">leads</text></svg>'+
+    '<div class="legend">'+slices.map(function(s){ return '<div class="legend-item"><div class="legend-dot" style="background:'+s.c+'"></div><span>'+escH(s.k)+'</span><span class="legend-pct">'+s.pct+'%</span></div>'; }).join("")+'</div></div>';
+}
+
+window.exportCSV = function(){
+  var h=["Empresa","CNPJ","Faturamento","Ticket","Dívida","Canal","Necessidades","Estágio","Prioridade","Responsável","Data Entrada","Próxima Ação","Prazo","Observações"];
+  var rows=cards.map(function(c){
+    var na=Array.isArray(c.nec)?c.nec:(c.nec?[c.nec]:[]);
+    return [c.empresa,c.cnpj,c.fat,c.ticket,c.divida,c.canal,na.join("; "),c.col,c.prioridade,c.responsavel,c.dataEntrada,c.proximaAcao,c.prazo,c.obs]
+      .map(function(v){ return '"'+(v||"").toString().replace(/"/g,'""')+'"'; }).join(",");
+  });
+  var csv="\uFEFF"+[h.join(",")].concat(rows).join("\n");
+  var a=document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
+  a.download="pipeline_tarvos_"+new Date().toISOString().slice(0,10)+".csv"; a.click();
+};
+
+document.getElementById("overlay").addEventListener("click",function(e){ if(e.target===this) closeModal(); });
+</script>
+</body>
+</html>
