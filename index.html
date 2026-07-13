@@ -18,7 +18,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tab.active{color:var(--text);border-bottom-color:#1a1a18;font-weight:500}
 .tab:hover{color:var(--text)}
 .toolbar{padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--bg);border-bottom:0.5px solid var(--border)}
-select,input{font-size:12px;padding:5px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-family:inherit}
+select{font-size:12px;padding:5px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;font-family:inherit}
+input{font-size:12px;padding:5px 10px;border-radius:6px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text);font-family:inherit}
 .btn-new{margin-left:auto;background:#1a1a18;color:#fff;border:none;padding:7px 16px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer}
 .btn-new:hover{background:#333}
 .count{font-size:12px;color:var(--text3)}
@@ -93,6 +94,7 @@ select,input{font-size:12px;padding:5px 10px;border-radius:6px;border:0.5px soli
 .btn-save{flex:1;padding:9px;border-radius:8px;border:none;background:#1a1a18;color:#fff;font-weight:500;font-size:13px;cursor:pointer}
 .btn-cancel{flex:1;padding:9px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--text2);font-size:13px;cursor:pointer}
 .btn-export{font-size:12px;padding:5px 12px;border-radius:6px;border:0.5px solid #555;background:transparent;cursor:pointer;color:#ccc}
+.btn-logout{font-size:11px;padding:4px 12px;border-radius:6px;border:0.5px solid #555;background:transparent;cursor:pointer;color:#aaa}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .nec-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
 .nec-chip{padding:5px 11px;border-radius:999px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid transparent;opacity:.4;transition:opacity .15s,border-color .15s;white-space:nowrap}
@@ -104,46 +106,69 @@ select,input{font-size:12px;padding:5px 10px;border-radius:6px;border:0.5px soli
 @keyframes spin{to{transform:rotate(360deg)}}
 .pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#6fcf97;margin-right:6px;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.login-screen{position:fixed;inset:0;background:#1a1a18;z-index:99999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.login-screen.show{display:flex}
+.login-box{background:#2e2e2c;border-radius:14px;padding:28px 32px;width:320px;max-width:90vw;border:0.5px solid #444}
+.login-title{font-size:20px;font-weight:500;color:#fff;text-align:center;margin-bottom:4px}
+.login-sub{font-size:12px;color:#888;text-align:center;margin-bottom:24px}
+.login-label{font-size:12px;color:#aaa;display:block;margin-bottom:5px}
+.login-input{width:100%;font-size:13px;padding:9px 12px;border-radius:7px;border:0.5px solid #555;background:#1a1a18;color:#fff;font-family:inherit;margin-bottom:14px;box-sizing:border-box}
+.login-btn{width:100%;padding:10px;border-radius:8px;border:none;background:#f5c842;color:#1a1a18;font-weight:600;font-size:13px;cursor:pointer;margin-top:6px}
+.login-err{display:none;font-size:12px;color:#f5a442;text-align:center;margin-bottom:10px}
 @media(max-width:600px){.metrics,.metrics2{grid-template-columns:1fr 1fr}.charts-row{grid-template-columns:1fr}.row2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
+<div class="login-screen" id="login-screen">
+  <div style="text-align:center;margin-bottom:4px">
+    <div class="login-title">Tarvos Partners</div>
+    <div class="login-sub">Pipeline de Oportunidades</div>
+  </div>
+  <div class="login-box">
+    <label class="login-label">Usuário</label>
+    <input class="login-input" id="login-user" type="text" placeholder="usuário" autocomplete="username">
+    <label class="login-label">Senha</label>
+    <input class="login-input" id="login-pass" type="password" placeholder="senha" autocomplete="current-password">
+    <div class="login-err" id="login-err">Usuário ou senha incorretos.</div>
+    <button class="login-btn" id="login-btn">Entrar</button>
+  </div>
+</div>
+
 <div class="splash" id="splash">
   <div class="spinner"></div>
   <div class="splash-logo">Tarvos Partners</div>
-  <div class="splash-sub" id="splash-msg">Conectando ao banco de dados...</div>
+  <div class="splash-sub" id="splash-msg">Conectando...</div>
 </div>
 
-<div class="topbar">
-  <h1>Tarvos Partners · Pipeline</h1>
-  <span class="sync-badge" id="sync-badge"><span class="pulse"></span>Ao vivo</span>
-  <button class="btn-export" onclick="exportCSV()">⬇ Exportar CSV</button>
-</div>
-
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('kanban',this)">Kanban</button>
-  <button class="tab" onclick="switchTab('dashboard',this)">Dashboard</button>
-  <button class="tab" onclick="switchTab('search',this)">🔍 Buscar</button>
-</div>
-
-<div class="toolbar" id="toolbar">
-  <select id="f-canal" onchange="render()"><option value="">Todos os canais</option></select>
-  <select id="f-nec" onchange="render()"><option value="">Todas as necessidades</option></select>
-  <span class="count" id="count-label">—</span>
-  <button class="btn-new" onclick="openModal()">+ Nova oportunidade</button>
-</div>
-
-<div class="search-wrap" id="search-wrap">
-  <div class="search-row">
-    <input class="search-input" id="search-input" type="text" placeholder="Digite o nome da empresa..." oninput="doSearch()">
-    <button onclick="clearSearch()" style="font-size:12px;padding:7px 14px;border-radius:7px;border:0.5px solid var(--border);background:transparent;cursor:pointer;color:var(--text2)">Limpar</button>
+<div id="app" style="display:none">
+  <div class="topbar">
+    <h1>Tarvos Partners · Pipeline</h1>
+    <span class="sync-badge" id="sync-badge"><span class="pulse"></span>Ao vivo</span>
+    <button class="btn-logout" id="btn-logout">Sair</button>
+    <button class="btn-export" id="btn-export">⬇ Exportar CSV</button>
   </div>
-  <div class="sr-list" id="sr-list"></div>
+  <div class="tabs">
+    <button class="tab active" id="tab-kanban">Kanban</button>
+    <button class="tab" id="tab-dashboard">Dashboard</button>
+    <button class="tab" id="tab-search">🔍 Buscar</button>
+  </div>
+  <div class="toolbar" id="toolbar">
+    <select id="f-canal"><option value="">Todos os canais</option></select>
+    <select id="f-nec"><option value="">Todas as necessidades</option></select>
+    <span class="count" id="count-label">—</span>
+    <button class="btn-new" id="btn-new">+ Nova oportunidade</button>
+  </div>
+  <div class="search-wrap" id="search-wrap">
+    <div class="search-row">
+      <input class="search-input" id="search-input" type="text" placeholder="Digite o nome da empresa...">
+      <button id="btn-clear-search" style="font-size:12px;padding:7px 14px;border-radius:7px;border:0.5px solid var(--border);background:transparent;cursor:pointer;color:var(--text2)">Limpar</button>
+    </div>
+    <div class="sr-list" id="sr-list"></div>
+  </div>
+  <div id="view-kanban"><div class="board" id="board"></div></div>
+  <div id="view-dashboard" style="display:none"><div class="dash" id="dash"></div></div>
 </div>
-
-<div id="view-kanban"><div class="board" id="board"></div></div>
-<div id="view-dashboard" style="display:none"><div class="dash" id="dash"></div></div>
 
 <div class="overlay" id="overlay">
   <div class="modal">
@@ -172,29 +197,30 @@ select,input{font-size:12px;padding:5px 10px;border-radius:6px;border:0.5px soli
     <div class="field"><label>Prazo</label><input type="date" id="f-prazo"></div>
     <div class="field"><label>Observações</label><textarea id="f-obs" rows="4" placeholder="Informações da empresa, contexto do caso, credores relevantes..."></textarea></div>
     <div class="modal-btns">
-      <button class="btn-save" onclick="saveCard()">Salvar</button>
-      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-save" id="btn-save-card">Salvar</button>
+      <button class="btn-cancel" id="btn-cancel-modal">Cancelar</button>
     </div>
   </div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBVRowHrQvLCs3NcRjks5dTZPKt9oN7oXA",
-  authDomain: "tarvos-pipeline.firebaseapp.com",
-  projectId: "tarvos-pipeline",
-  storageBucket: "tarvos-pipeline.firebasestorage.app",
-  messagingSenderId: "958462368022",
-  appId: "1:958462368022:web:adf303c53905749a405837"
-};
+var LOGIN_USER = "tarvos";
+var LOGIN_PASS = "pipeline2026";
+var AUTH_KEY   = "tvp_auth_v1";
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
-const REF = doc(db, "pipeline", "cards");
+var app = initializeApp({
+  apiKey:"AIzaSyBVRowHrQvLCs3NcRjks5dTZPKt9oN7oXA",
+  authDomain:"tarvos-pipeline.firebaseapp.com",
+  projectId:"tarvos-pipeline",
+  storageBucket:"tarvos-pipeline.firebasestorage.app",
+  messagingSenderId:"958462368022",
+  appId:"1:958462368022:web:adf303c53905749a405837"
+});
+var db  = getFirestore(app);
+var REF = doc(db,"pipeline","cards");
 
 var COLS   = ["Leads","Leads Qualificados","Associados","Análise Técnica","Oportunidade","Reunião de Apresentação","Proposta Enviada","Em Negociação","Em Assinatura","Convertido","Descartado","Stand By"];
 var CANAIS = ["Mineração RJ/Falência","Network","Associados","Eventos","Mídia"];
@@ -204,103 +230,101 @@ var NEC_C  = {"Reestruturação":"#533AB7","NPL":"#0F6E56","DIP":"#185FA5","Dist
 var PRIO_S = {"Alta":{bg:"#FCEBEB",c:"#A32D2D"},"Média":{bg:"#FAEEDA",c:"#854F0B"},"Baixa":{bg:"#EAF3DE",c:"#3B6D11"}};
 var COL_C  = ["#B0A8E8","#7F77DD","#533AB7","#4A90C4","#378ADD","#185FA5","#1D9E75","#0F6E56","#BA7517","#3B6D11","#888780","#C4A35A"];
 
-var cards   = [];
-var curTab  = "kanban";
-var dragId  = null, dragOverId = null, dragPos = "after";
-var isSaving = false;
-var pendingSave = false;
+var cards=[], curTab="kanban", dragId=null, dragOverId=null, dragPos="after";
+var isSaving=false, pendingSave=false;
 
 function escH(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function setBadge(t,ok){ var b=document.getElementById("sync-badge"); b.innerHTML='<span class="pulse"></span>'+t; b.className="sync-badge"+(ok===true?" ok":ok===false?" err":""); }
 
-function setBadge(txt, ok){
-  var b = document.getElementById("sync-badge");
-  b.innerHTML = '<span class="pulse"></span>' + txt;
-  b.className = "sync-badge" + (ok===false?" err": ok===true?" ok":"");
+/* ── LOGIN ── */
+function isLoggedIn(){ return localStorage.getItem(AUTH_KEY)==="ok"; }
+
+document.getElementById("login-btn").addEventListener("click",doLogin);
+document.getElementById("login-pass").addEventListener("keydown",function(e){ if(e.key==="Enter") doLogin(); });
+
+function doLogin(){
+  var u=document.getElementById("login-user").value.trim();
+  var p=document.getElementById("login-pass").value;
+  if(u===LOGIN_USER && p===LOGIN_PASS){
+    localStorage.setItem(AUTH_KEY,"ok");
+    document.getElementById("login-screen").classList.remove("show");
+    startApp();
+  } else {
+    document.getElementById("login-err").style.display="block";
+  }
 }
+
+document.getElementById("btn-logout").addEventListener("click",function(){
+  localStorage.removeItem(AUTH_KEY); location.reload();
+});
 
 /* ── MIGRAÇÃO ── */
 function migrar(arr){
-  var colMapa = {"Análise":"Oportunidade","Tese Definida":"Reunião de Apresentação","Em Abordagem":"Proposta Enviada","Variação de EBITDA":"Fixo"};
+  var colMapa={"Análise":"Oportunidade","Tese Definida":"Reunião de Apresentação","Em Abordagem":"Proposta Enviada","Variação de EBITDA":"Fixo"};
   return (arr||[]).map(function(c){
-    var nc = Object.assign({},c);
-    if(colMapa[nc.col]) nc.col = colMapa[nc.col];
-    var na = Array.isArray(nc.nec)?nc.nec:(nc.nec?[nc.nec]:[]);
-    nc.nec = na.filter(function(n){ return n!=="Extraconcursal"; });
+    var nc=Object.assign({},c);
+    if(colMapa[nc.col]) nc.col=colMapa[nc.col];
+    var na=Array.isArray(nc.nec)?nc.nec:(nc.nec?[nc.nec]:[]);
+    nc.nec=na.filter(function(n){ return n!=="Extraconcursal"; });
     return nc;
   });
 }
 
-/* ── FIREBASE SAVE ── */
+/* ── FIREBASE ── */
 async function saveRemote(){
   if(isSaving){ pendingSave=true; return; }
-  isSaving=true; setBadge("Salvando...", null);
-  try{
-    await setDoc(REF, {cards: cards, updatedAt: Date.now()});
-    setBadge("Ao vivo", true);
-  } catch(e){
-    setBadge("Erro ao salvar", false);
-  }
+  isSaving=true; setBadge("Salvando...",null);
+  try{ await setDoc(REF,{cards:cards,updatedAt:Date.now()}); setBadge("Ao vivo",true); }
+  catch(e){ setBadge("Erro ao salvar",false); }
   isSaving=false;
   if(pendingSave){ pendingSave=false; saveRemote(); }
 }
 
-/* ── MIGRAÇÃO DO LOCALSTORAGE ── */
-async function migrarLocalStorage(){
-  try{
-    var local = localStorage.getItem("tarvos_pipeline_v3");
-    if(!local) return;
-    var dados = JSON.parse(local);
-    if(!dados || !dados.length) return;
-    var snap = await getDoc(REF);
-    var remoto = snap.exists() ? (snap.data().cards||[]) : [];
-    if(remoto.length === 0){
-      cards = migrar(dados);
-      await saveRemote();
-    }
-    localStorage.removeItem("tarvos_pipeline_v3");
-  } catch(e){}
-}
-
-/* ── LISTENER TEMPO REAL ── */
 function startListener(){
-  onSnapshot(REF, function(snap){
+  onSnapshot(REF,function(snap){
     if(!snap.exists()){ cards=[]; render(); return; }
-    var data = snap.data().cards || [];
-    cards = migrar(data);
+    cards=migrar(snap.data().cards||[]);
     render();
-    if(document.getElementById("search-wrap").classList.contains("open")) doSearch();
-    setBadge("Ao vivo", true);
-  }, function(){
-    setBadge("Sem conexão", false);
-  });
+    setBadge("Ao vivo",true);
+  },function(){ setBadge("Sem conexão",false); });
 }
 
-/* ── INIT ── */
-async function init(){
-  document.getElementById("splash-msg").textContent = "Verificando dados locais...";
-  await migrarLocalStorage();
-  document.getElementById("splash-msg").textContent = "Conectando ao banco...";
+function startApp(){
+  document.getElementById("splash").style.display="flex";
+  document.getElementById("app").style.display="none";
   startListener();
-  setTimeout(function(){ document.getElementById("splash").style.display="none"; }, 1200);
+  setTimeout(function(){
+    document.getElementById("splash").style.display="none";
+    document.getElementById("app").style.display="block";
+  },1000);
 }
 
-init();
+/* ── BOOT ── */
+if(isLoggedIn()){ startApp(); }
+else { document.getElementById("splash").style.display="none"; document.getElementById("login-screen").classList.add("show"); }
 
 /* ── TABS ── */
-window.switchTab = function(tab,el){
+document.getElementById("tab-kanban").addEventListener("click",function(){ switchTab("kanban",this); });
+document.getElementById("tab-dashboard").addEventListener("click",function(){ switchTab("dashboard",this); });
+document.getElementById("tab-search").addEventListener("click",function(){ switchTab("search",this); });
+
+function switchTab(tab,el){
   curTab=tab;
   document.querySelectorAll(".tab").forEach(function(t){ t.classList.remove("active"); });
   el.classList.add("active");
-  document.getElementById("view-kanban").style.display    = tab==="kanban"?"":"none";
-  document.getElementById("view-dashboard").style.display = tab==="dashboard"?"":"none";
+  document.getElementById("view-kanban").style.display    =tab==="kanban"?"":"none";
+  document.getElementById("view-dashboard").style.display =tab==="dashboard"?"":"none";
   document.getElementById("search-wrap").classList[tab==="search"?"add":"remove"]("open");
-  document.getElementById("toolbar").style.display        = tab==="search"?"none":"";
+  document.getElementById("toolbar").style.display        =tab==="search"?"none":"";
   if(tab==="search"){ document.getElementById("search-input").focus(); doSearch(); }
   if(tab!=="search") render();
-};
+}
 
 /* ── SEARCH ── */
-window.doSearch = function(){
+document.getElementById("search-input").addEventListener("input",doSearch);
+document.getElementById("btn-clear-search").addEventListener("click",function(){ document.getElementById("search-input").value=""; doSearch(); });
+
+function doSearch(){
   var q=(document.getElementById("search-input").value||"").trim().toLowerCase();
   var list=document.getElementById("sr-list");
   if(!q){ list.innerHTML='<div style="font-size:13px;color:var(--text3);padding:4px 0">Digite para buscar.</div>'; return; }
@@ -310,29 +334,38 @@ window.doSearch = function(){
     var na=Array.isArray(c.nec)?c.nec:(c.nec?[c.nec]:[]);
     var badges=na.map(function(n){ var nc=NEC_C[n]||"#888"; return '<span style="font-size:10px;font-weight:500;padding:2px 7px;border-radius:999px;background:'+nc+'22;color:'+nc+'">'+escH(n)+'</span>'; }).join("");
     return '<div class="sr-item"><div style="flex:1"><div class="sr-name">'+escH(c.empresa||"Sem nome")+'</div><div class="sr-meta">'+(c.cnpj?escH(c.cnpj)+' · ':'')+escH(c.canal||'')+'</div>'+(badges?'<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:4px">'+badges+'</div>':'')+
-    '</div><span class="sr-col">'+escH(c.col)+'</span><button class="sr-edit" onclick="openModal(null,\''+c.id+'\')">Editar</button></div>';
+    '</div><span class="sr-col">'+escH(c.col)+'</span><button class="sr-edit" data-id="'+c.id+'">Editar</button></div>';
   }).join("");
-};
-
-window.clearSearch = function(){ document.getElementById("search-input").value=""; doSearch(); };
+  list.querySelectorAll(".sr-edit").forEach(function(btn){ btn.addEventListener("click",function(){ openModal(null,btn.dataset.id); }); });
+}
 
 /* ── FILTERS ── */
+document.getElementById("f-canal").addEventListener("change", function(){ render(); });
+document.getElementById("f-nec").addEventListener("change", function(){ render(); });
+document.getElementById("btn-new").addEventListener("click",function(){ openModal(); });
+
+function getFilterVals(){
+  return {
+    fc: document.getElementById("f-canal").value,
+    fn: document.getElementById("f-nec").value
+  };
+}
+
 function filtered(){
-  var fc=document.getElementById("f-canal").value;
-  var fn=document.getElementById("f-nec").value;
+  var v=getFilterVals();
   return cards.filter(function(c){
     var na=Array.isArray(c.nec)?c.nec:(c.nec?[c.nec]:[]);
-    return (!fc||c.canal===fc)&&(!fn||na.indexOf(fn)!==-1);
+    return (!v.fc||c.canal===v.fc)&&(!v.fn||na.indexOf(v.fn)!==-1);
   });
 }
 
 function populateFilters(){
-  var fc=document.getElementById("f-canal"),fn=document.getElementById("f-nec");
-  var cv=fc.value,nv=fn.value;
+  var fc=document.getElementById("f-canal"), fn=document.getElementById("f-nec");
+  var cv=fc.value, nv=fn.value;
   fc.innerHTML='<option value="">Todos os canais</option>'+CANAIS.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join("");
   fn.innerHTML='<option value="">Todas as necessidades</option>'+NECS.map(function(n){ return '<option value="'+n+'">'+n+'</option>'; }).join("");
   fc.value=cv; fn.value=nv;
-  var fm=document.getElementById("f-canal-m"),cm=document.getElementById("f-col");
+  var fm=document.getElementById("f-canal-m"), cm=document.getElementById("f-col");
   if(fm) fm.innerHTML=CANAIS.map(function(c){ return '<option>'+c+'</option>'; }).join("");
   if(cm) cm.innerHTML=COLS.map(function(c){ return '<option>'+c+'</option>'; }).join("");
 }
@@ -358,8 +391,12 @@ function renderBoard(f){
     div.className="col"; div.dataset.col=col;
     var html='<div class="col-header"><span class="col-title">'+col+'</span><span class="col-count">'+cc.length+'</span></div>';
     cc.forEach(function(card){ html+=cardHTML(card); });
-    html+='<button class="btn-add-col" onclick="openModal(\''+escH(col)+'\')">+ Adicionar</button>';
+    html+='<button class="btn-add-col" data-col="'+escH(col)+'">+ Adicionar</button>';
     div.innerHTML=html;
+    div.querySelectorAll(".btn-add-col").forEach(function(b){ b.addEventListener("click",function(){ openModal(b.dataset.col); }); });
+    div.querySelectorAll(".btn-edit-card").forEach(function(b){ b.addEventListener("click",function(){ openModal(null,b.dataset.id); }); });
+    div.querySelectorAll(".btn-del-card").forEach(function(b){ b.addEventListener("click",function(){ delCard(b.dataset.id); }); });
+    div.querySelectorAll(".col-sel").forEach(function(s){ s.addEventListener("change",function(){ moveCard(s.dataset.id,s.value); }); });
     div.addEventListener("dragover",function(e){
       e.preventDefault();
       var t=e.target.closest(".card");
@@ -371,9 +408,7 @@ function renderBoard(f){
         div.classList.remove("dragover-col");
       } else { dragOverId=null; div.classList.add("dragover-col"); }
     });
-    div.addEventListener("dragleave",function(e){
-      if(!div.contains(e.relatedTarget)){ div.classList.remove("dragover-col"); document.querySelectorAll(".card").forEach(function(c){ c.classList.remove("drop-before","drop-after"); }); }
-    });
+    div.addEventListener("dragleave",function(e){ if(!div.contains(e.relatedTarget)){ div.classList.remove("dragover-col"); document.querySelectorAll(".card").forEach(function(c){ c.classList.remove("drop-before","drop-after"); }); } });
     div.addEventListener("drop",function(e){
       e.preventDefault(); div.classList.remove("dragover-col");
       document.querySelectorAll(".card").forEach(function(c){ c.classList.remove("drop-before","drop-after"); });
@@ -384,6 +419,9 @@ function renderBoard(f){
     });
     board.appendChild(div);
   });
+  /* drag via delegation */
+  board.addEventListener("dragstart",function(e){ var c=e.target.closest(".card"); if(!c) return; dragId=c.dataset.cid; c.classList.add("dragging"); },{once:false});
+  board.addEventListener("dragend",function(e){ var c=e.target.closest(".card"); if(c) c.classList.remove("dragging"); },{once:false});
 }
 
 function cardHTML(card){
@@ -396,7 +434,7 @@ function cardHTML(card){
   if(card.fat)    nums.push("Fat.: R$ "+parseFloat(card.fat).toLocaleString("pt-BR"));
   if(card.divida) nums.push('<span class="card-num-divida">Dívida: R$ '+parseFloat(card.divida).toLocaleString("pt-BR")+'</span>');
   var necB=na.map(function(n){ var nc=NEC_C[n]||"#888"; return '<span class="badge" style="background:'+nc+'22;color:'+nc+'">'+escH(n)+'</span>'; }).join("");
-  var h='<div class="card" draggable="true" data-cid="'+card.id+'" id="card-'+card.id+'" ondragstart="dragId=\''+card.id+'\';this.classList.add(\'dragging\')" ondragend="this.classList.remove(\'dragging\')">';
+  var h='<div class="card" draggable="true" data-cid="'+card.id+'">';
   h+='<div class="card-top"><span class="card-name">'+escH(card.empresa||"Sem nome")+'</span><span class="badge" style="background:'+ps.bg+';color:'+ps.c+'">'+card.prioridade+'</span></div>';
   if(card.cnpj)        h+='<div class="card-cnpj">'+escH(card.cnpj)+'</div>';
   if(nums.length)      h+='<div class="card-nums">'+nums.join(" · ")+'</div>';
@@ -404,47 +442,46 @@ function cardHTML(card){
   if(card.proximaAcao) h+='<div class="card-action"><b>Próx. ação:</b> '+escH(card.proximaAcao)+(card.prazo?" · "+card.prazo:"")+'</div>';
   if(card.obs)         h+='<div class="card-obs">'+escH(card.obs.length>90?card.obs.slice(0,90)+"…":card.obs)+'</div>';
   if(card.responsavel) h+='<div class="card-resp">'+escH(card.responsavel)+'</div>';
-  h+='<div class="card-btns"><button class="btn-edit" onclick="openModal(null,\''+card.id+'\')">Editar</button><select class="col-sel" onchange="moveCard(\''+card.id+'\',this.value)">'+colOpts+'</select><button class="btn-del" onclick="delCard(\''+card.id+'\')">✕ Excluir</button></div>';
-  if(card.col==="Descartado") h+='<button onclick="delCard(\''+card.id+'\')" style="width:100%;margin-top:6px;padding:5px;border-radius:6px;border:1px solid #a32d2d;background:#fdecea;color:#a32d2d;font-size:11px;font-weight:500;cursor:pointer">🗑 Excluir permanentemente</button>';
+  h+='<div class="card-btns"><button class="btn-edit btn-edit-card" data-id="'+card.id+'">Editar</button><select class="col-sel" data-id="'+card.id+'">'+colOpts+'</select><button class="btn-del btn-del-card" data-id="'+card.id+'">✕ Excluir</button></div>';
+  if(card.col==="Descartado") h+='<button class="btn-del-card" data-id="'+card.id+'" style="width:100%;margin-top:6px;padding:5px;border-radius:6px;border:1px solid #a32d2d;background:#fdecea;color:#a32d2d;font-size:11px;font-weight:500;cursor:pointer">🗑 Excluir permanentemente</button>';
   h+='</div>';
   return h;
 }
 
 /* ── REORDER / MOVE ── */
-window.reorderCard = function(fromId,toCol,refId,pos){
-  var idx=-1; for(var i=0;i<cards.length;i++){ if(String(cards[i].id)===String(fromId)){ idx=i; break; } }
-  if(idx===-1) return;
+function reorderCard(fromId,toCol,refId,pos){
+  var idx=-1; for(var i=0;i<cards.length;i++){ if(String(cards[i].id)===String(fromId)){ idx=i; break; } } if(idx===-1) return;
   var card=Object.assign({},cards[idx],{col:toCol});
   var tmp=cards.slice(); tmp.splice(idx,1);
   var ri=-1; for(var j=0;j<tmp.length;j++){ if(String(tmp[j].id)===String(refId)){ ri=j; break; } }
   if(ri===-1) tmp.push(card); else if(pos==="before") tmp.splice(ri,0,card); else tmp.splice(ri+1,0,card);
-  cards=tmp; saveRemote();
-};
+  cards=tmp; saveRemote(); render();
+}
 
-window.moveCard = function(id,col){
+function moveCard(id,col){
   cards=cards.map(function(c){ return String(c.id)===String(id)?Object.assign({},c,{col:col}):c; });
-  saveRemote();
-};
+  saveRemote(); render();
+}
 
 /* ── NEC CHIPS ── */
-window.buildNecChips = function(selected){
+function buildNecChips(selected){
   var grid=document.getElementById("nec-chips"); if(!grid) return; grid.innerHTML="";
   NECS.forEach(function(n){
     var c=NEC_C[n]||"#888";
     var chip=document.createElement("span");
     chip.className="nec-chip"+(selected.indexOf(n)!==-1?" selected":"");
     chip.textContent=n; chip.style.background=c+"22"; chip.style.color=c; chip.dataset.nec=n;
-    chip.onclick=function(){ chip.classList.toggle("selected"); };
+    chip.addEventListener("click",function(){ chip.classList.toggle("selected"); });
     grid.appendChild(chip);
   });
-};
+}
 
 function getSelectedNecs(){
   return Array.prototype.slice.call(document.querySelectorAll("#nec-chips .nec-chip.selected")).map(function(ch){ return ch.dataset.nec; });
 }
 
 /* ── MODAL ── */
-window.openModal = function(col,id){
+function openModal(col,id){
   populateFilters();
   if(id){
     var c=null; for(var i=0;i<cards.length;i++){ if(String(cards[i].id)===String(id)){ c=cards[i]; break; } } if(!c) return;
@@ -474,11 +511,9 @@ window.openModal = function(col,id){
     buildNecChips([]);
   }
   document.getElementById("overlay").classList.add("open");
-};
+}
 
-window.closeModal = function(){ document.getElementById("overlay").classList.remove("open"); };
-
-window.saveCard = function(){
+document.getElementById("btn-save-card").addEventListener("click",function(){
   var id=document.getElementById("f-id").value;
   var card={
     id:id||String(Date.now()+Math.random()),
@@ -499,14 +534,18 @@ window.saveCard = function(){
   };
   if(id) cards=cards.map(function(c){ return String(c.id)===String(id)?card:c; });
   else cards.push(card);
-  saveRemote(); closeModal();
-};
+  saveRemote(); document.getElementById("overlay").classList.remove("open"); render();
+  if(curTab==="search") doSearch();
+});
 
-window.delCard = function(id){
+document.getElementById("btn-cancel-modal").addEventListener("click",function(){ document.getElementById("overlay").classList.remove("open"); });
+document.getElementById("overlay").addEventListener("click",function(e){ if(e.target===this) document.getElementById("overlay").classList.remove("open"); });
+
+function delCard(id){
   if(!confirm("Excluir esta oportunidade?")) return;
   cards=cards.filter(function(c){ return String(c.id)!==String(id); });
-  saveRemote();
-};
+  saveRemote(); render();
+}
 
 /* ── DASHBOARD ── */
 function renderDash(f){
@@ -569,7 +608,8 @@ function donutSVG(data){
     '<div class="legend">'+slices.map(function(s){ return '<div class="legend-item"><div class="legend-dot" style="background:'+s.c+'"></div><span>'+escH(s.k)+'</span><span class="legend-pct">'+s.pct+'%</span></div>'; }).join("")+'</div></div>';
 }
 
-window.exportCSV = function(){
+/* ── CSV ── */
+document.getElementById("btn-export").addEventListener("click",function(){
   var h=["Empresa","CNPJ","Faturamento","Ticket","Dívida","Canal","Necessidades","Estágio","Prioridade","Responsável","Data Entrada","Próxima Ação","Prazo","Observações"];
   var rows=cards.map(function(c){
     var na=Array.isArray(c.nec)?c.nec:(c.nec?[c.nec]:[]);
@@ -579,9 +619,7 @@ window.exportCSV = function(){
   var csv="\uFEFF"+[h.join(",")].concat(rows).join("\n");
   var a=document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
   a.download="pipeline_tarvos_"+new Date().toISOString().slice(0,10)+".csv"; a.click();
-};
-
-document.getElementById("overlay").addEventListener("click",function(e){ if(e.target===this) closeModal(); });
+});
 </script>
 </body>
 </html>
