@@ -432,7 +432,7 @@ function cardHTML(card){
   var nums=[];
   if(card.ticket) nums.push("Ticket: R$ "+parseFloat(card.ticket).toLocaleString("pt-BR"));
   if(card.fat)    nums.push("Fat.: R$ "+parseFloat(card.fat).toLocaleString("pt-BR"));
-  if(card.divida) nums.push('<span class="card-num-divida">Dívida: R$ '+parseFloat(card.divida).toLocaleString("pt-BR")+'</span>');
+  if(card.divida&&parseFloat(card.divida)>0) nums.push('<span class="card-num-divida">Dívida: R$ '+parseFloat(card.divida).toLocaleString("pt-BR",{minimumFractionDigits:0,maximumFractionDigits:0})+'</span>');
   var necB=na.map(function(n){ var nc=NEC_C[n]||"#888"; return '<span class="badge" style="background:'+nc+'22;color:'+nc+'">'+escH(n)+'</span>'; }).join("");
   var h='<div class="card" draggable="true" data-cid="'+card.id+'">';
   h+='<div class="card-top"><span class="card-name">'+escH(card.empresa||"Sem nome")+'</span><span class="badge" style="background:'+ps.bg+';color:'+ps.c+'">'+card.prioridade+'</span></div>';
@@ -521,7 +521,7 @@ document.getElementById("btn-save-card").addEventListener("click",function(){
     cnpj:document.getElementById("f-cnpj").value.trim(),
     fat:document.getElementById("f-fat").value,
     ticket:document.getElementById("f-ticket").value,
-    divida:document.getElementById("f-divida").value,
+    divida:document.getElementById("f-divida").value.replace(",","."),
     canal:document.getElementById("f-canal-m").value,
     nec:getSelectedNecs(),
     col:document.getElementById("f-col").value,
@@ -556,12 +556,12 @@ function renderDash(f){
   var ativo=f.filter(function(c){ return excl.indexOf(c.col)===-1&&c.col!=="Convertido"; }).length;
   var rate=total>0?Math.round(conv/total*100):0;
   var ticket=f.filter(function(c){ return c.ticket; }).reduce(function(s,c){ return s+parseFloat(c.ticket||0); },0);
-  var divida=f.filter(function(c){ return c.divida; }).reduce(function(s,c){ return s+parseFloat(c.divida||0); },0);
+  var divida=f.filter(function(c){ return c.divida&&parseFloat(c.divida)>0; }).reduce(function(s,c){ return s+parseFloat(c.divida); },0);
   var cC=f.filter(function(c){ return c.col==="Convertido"&&c.ticket; });
   var tM=cC.length>0?cC.reduce(function(s,c){ return s+parseFloat(c.ticket||0); },0)/cC.length:0;
   var tC=f.filter(function(c){ return c.col==="Convertido"&&c.dataEntrada&&c.prazo; });
   var tm=0; if(tC.length){ var sm=tC.reduce(function(s,c){ return s+Math.max(0,Math.round((new Date(c.prazo)-new Date(c.dataEntrada))/86400000)); },0); tm=Math.round(sm/tC.length); }
-  var dC=f.filter(function(c){ return c.divida; }).length;
+  var dC=f.filter(function(c){ return c.divida&&parseFloat(c.divida)>0; }).length;
   var html='<div class="metrics">'+
     '<div class="metric"><div class="metric-label">Total leads</div><div class="metric-val">'+total+'</div></div>'+
     '<div class="metric"><div class="metric-label">Em andamento</div><div class="metric-val">'+ativo+'</div></div>'+
@@ -617,9 +617,4 @@ document.getElementById("btn-export").addEventListener("click",function(){
       .map(function(v){ return '"'+(v||"").toString().replace(/"/g,'""')+'"'; }).join(",");
   });
   var csv="\uFEFF"+[h.join(",")].concat(rows).join("\n");
-  var a=document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+encodeURIComponent(csv);
-  a.download="pipeline_tarvos_"+new Date().toISOString().slice(0,10)+".csv"; a.click();
-});
-</script>
-</body>
-</html>
+  var a=document.createElement("a"); a.href="data:text/csv;charset=utf-8,"+enco
