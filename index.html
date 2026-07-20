@@ -533,7 +533,7 @@ document.getElementById("btn-save-card").addEventListener("click",function(){
     prazo:document.getElementById("f-prazo").value,
     obs:document.getElementById("f-obs").value.trim()
   };
-  if(id) cards=cards.map(function(c){ return String(c.id)===String(id)?card:c; });
+    if(id) cards=cards.map(function(c){ return String(c.id)===String(id)?card:c; });
   else cards.push(card);
   saveRemote(); document.getElementById("overlay").classList.remove("open"); render();
   if(curTab==="search") doSearch();
