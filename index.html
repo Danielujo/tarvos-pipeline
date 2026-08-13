@@ -156,6 +156,7 @@ input{font-size:12px;padding:5px 10px;border-radius:6px;border:0.5px solid var(-
   <div class="toolbar" id="toolbar">
     <select id="f-canal"><option value="">Todos os canais</option></select>
     <select id="f-nec"><option value="">Todas as necessidades</option></select>
+    <select id="f-col-filter"><option value="">Todas as colunas</option></select>
     <span class="count" id="count-label">—</span>
     <button class="btn-new" id="btn-new">+ Nova oportunidade</button>
   </div>
@@ -356,12 +357,14 @@ function doSearch(){
 /* ── FILTERS ── */
 document.getElementById("f-canal").addEventListener("change", function(){ render(); });
 document.getElementById("f-nec").addEventListener("change", function(){ render(); });
+document.getElementById("f-col-filter").addEventListener("change", function(){ render(); });
 document.getElementById("btn-new").addEventListener("click",function(){ openModal(); });
 
 function getFilterVals(){
   return {
     fc: document.getElementById("f-canal").value,
-    fn: document.getElementById("f-nec").value
+    fn: document.getElementById("f-nec").value,
+    fcol: document.getElementById("f-col-filter").value
   };
 }
 
@@ -369,7 +372,7 @@ function filtered(){
   var v=getFilterVals();
   return cards.filter(function(c){
     var na=Array.isArray(c.nec)?c.nec:(c.nec?[c.nec]:[]);
-    return (!v.fc||c.canal===v.fc)&&(!v.fn||na.indexOf(v.fn)!==-1);
+    return (!v.fc||c.canal===v.fc)&&(!v.fn||na.indexOf(v.fn)!==-1)&&(!v.fcol||c.col===v.fcol);
   });
 }
 
@@ -396,8 +399,13 @@ function render(){
 function renderBoard(f){
   var board=document.getElementById("board");
   var cf=document.getElementById("f-canal").value;
+  var colf=document.getElementById("f-col-filter").value;
   var showLeads=(cf==="Mídia");
-  var vis=COLS.filter(function(c){ return (c==="Leads"||c==="Leads Qualificados")?showLeads:true; });
+  var vis=COLS.filter(function(c){
+    if(c==="Leads"||c==="Leads Qualificados") return showLeads;
+    if(colf) return c===colf;
+    return true;
+  });
   board.innerHTML="";
   vis.forEach(function(col){
     var cc=f.filter(function(c){ return c.col===col; }).sort(function(a,b){
