@@ -222,7 +222,7 @@ var app = initializeApp({
 var db  = getFirestore(app);
 var REF = doc(db,"pipeline","cards");
 
-var COLS   = ["Leads","Leads Qualificados","Associados","Análise Técnica","Oportunidade","Reunião de Apresentação","Proposta Enviada","Em Negociação","Em Assinatura","Convertido","Descartado","Stand By"];
+var COLS   = ["Leads","Leads Qualificados","Associados","Análise Técnica","Oportunidade","Reunião de Apresentação","Proposta Enviada","Em Negociação","Em Assinatura","Convertido","Stand By","Descartado"];
 var CANAIS = ["Mineração RJ/Falência","Network","Associados","Eventos","Mídia"];
 var NECS   = ["Reestruturação","NPL","DIP","Negociações Complexas","Captação","Desmobilização","Fixo","Valuation","M&A","Advisory (projeto)","Precatórios","Direitos Creditórios","Dívida","Roadshow","Book","Projeto de BI"];
 var CANAL_C= {"Mineração RJ/Falência":"#7F77DD","Network":"#1D9E75","Associados":"#378ADD","Eventos":"#BA7517","Mídia":"#D4537E"};
