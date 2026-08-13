@@ -381,6 +381,7 @@ function populateFilters(){
   var cv=fc.value, nv=fn.value;
   fc.innerHTML='<option value="">Todos os canais</option>'+CANAIS.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join("");
   fn.innerHTML='<option value="">Todas as necessidades</option>'+NECS.map(function(n){ return '<option value="'+n+'">'+n+'</option>'; }).join("");
+  var fco=document.getElementById("f-col-filter"); var cov=fco.value; fco.innerHTML='<option value="">Todas as colunas</option>'+COLS.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join(""); fco.value=cov;
   fc.value=cv; fn.value=nv;
   var fm=document.getElementById("f-canal-m"), cm=document.getElementById("f-col");
   if(fm) fm.innerHTML=CANAIS.map(function(c){ return '<option>'+c+'</option>'; }).join("");
